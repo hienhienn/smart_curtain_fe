@@ -69,16 +69,19 @@ export default function RootLayout({
       }
     })
     socket.on('auto_mode', (data) => {
-      getStatus()
+      console.log(data)
     });
 
     }
   }, [router]);
 
   useEffect(() => {
-    getStatus()
     socketInitializer()
-  }, [socketInitializer])
+  }, [])
+
+  useEffect(() => {
+    getStatus()
+  }, [])
   return (
     <main>
       <StatusContext.Provider value={{ status, setStatus, getStatus }}>

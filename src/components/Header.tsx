@@ -59,7 +59,7 @@ export const Header = () => {
           <Switch
             checked={status.auto.status}
             onChange={() =>
-              changeAutoMode({ status: !status.auto.status })
+              changeAutoMode({ status: !status.auto.status, percent: 1 })
                 .then(() => getStatus())
                 .catch(err => {
                   console.log(err)

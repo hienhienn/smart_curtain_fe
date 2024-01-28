@@ -17,7 +17,7 @@ type informType = {
 }
 
 const Home = () => {
-  const { status, getStatus } = useContext(StatusContext)
+  const { status, getStatus, setStatus } = useContext(StatusContext)
   const [inform, setInform] = useState<informType>({
     percent: 0,
     indoor: 0,
@@ -25,16 +25,14 @@ const Home = () => {
     ledState: 0
   })
   const [percent, setPercent] = useState<number>(inform.percent)
+  const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true)
 
   const onChangeStatus = (value: number) => {
-    console.log(value)
-    console.log(localStorage.getItem('accessToken'))
-
     changeAutoMode({
       status: false,
-      percent: value
+      percent: value === 0 ? 1 : value
     }).then(res => {
-      getStatus()
+      setStatus({ ...status, auto: { status: false, percent: value === 0 ? 1 : value } })
     })
       .catch(err => {
         console.log(err)
@@ -50,9 +48,15 @@ const Home = () => {
     });
   }
 
-  useEffect(() => {
-    setPercent(inform.percent)
-  }, [inform])
+  // useEffect(() => {
+  //   const delay = setTimeout(() => { setPercent(inform.percent) }, 2000)
+  //   return () => clearTimeout(delay)
+  // }, [inform])
+
+  // useEffect(() => {
+  //   const delay = setTimeout(() => { onChangeStatus(percent) }, 1000)
+  //   return () => clearTimeout(delay)
+  // }, [percent])
 
   useEffect(() => {
     socketInitializer()
@@ -62,7 +66,7 @@ const Home = () => {
     <div className="border rounded-lg border-pink-300 mt-5 p-2 md:w-3/4">
       <div className="-translate-y-5 bg-white w-fit px-2 mx-2">My curtain</div>
       <div className="bg-gray-200 max-w-full rounded-md h-[60vh] m-2 mt-0">
-        <div className="w-full bg-pink-300 rounded-t-md transition-all duration-300" style={{ height: `${inform.percent}%` }}>
+        <div className="w-full bg-pink-300 rounded-t-md transition-all duration-300" style={{ height: `${100 - inform.percent}%` }}>
         </div>
       </div>
       <div className="mx-2 text-sm">Adjust</div>
@@ -81,7 +85,15 @@ const Home = () => {
           min={0}
           max={100}
           value={percent}
-          onChange={(e) => setPercent(Number(e.target.value))}
+          onChange={(e) => {
+            setPercent(Number(e.target.value))
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onChangeStatus(percent)
+              setPercent(0)
+            }
+          }}
         />
         <button
           className="my-auto"
@@ -98,6 +110,7 @@ const Home = () => {
       <div>Indoor: {inform.indoor}</div>
       <div>Outdoor: {inform.outdoor}</div>
       <div>Led state: {inform.ledState}</div>
+      <div>Percent: {inform.percent}</div>
     </div>
   </div>;
 };
